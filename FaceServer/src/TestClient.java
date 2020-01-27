@@ -2,20 +2,21 @@ package test;
 import org.opencv.core.*;
 import org.opencv.videoio.VideoCapture;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.*;
 import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
+//entry point
+public class TestClient{
+    public static void main(String[] args) {
+        new ClientFrame();
+    }
+}
+
+//JFrame wrapper
 class ClientFrame extends JFrame{
     public ClientFrame()
     {
@@ -25,10 +26,12 @@ class ClientFrame extends JFrame{
         f.setSize(400, 400);
         f.setVisible(true);
     }
+    /*
     public static void main(String args[])
     {
         new ClientFrame();
     }
+    */
 }
 
 class Client extends JPanel {
@@ -40,43 +43,6 @@ class Client extends JPanel {
 
     // Load OpenCV native library
     static{ System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
-
-    @Override
-    public void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        //System.out.println("Paint called");
-        try {
-            pLoop(g);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void pLoop(Graphics g) throws Exception{
-        Mat image = grabFrame();
-
-        long start = System.nanoTime();
-        sendFrame(image);
-        long stop = System.nanoTime();
-        System.out.println("sendFrame took: " + (stop - start) / 1000000 + " ms");
-
-        start = System.nanoTime();
-        currFrame = toBuffImg(image);
-        stop = System.nanoTime();
-        System.out.println("toBuffImg took: " + (stop - start) / 1000000 + " ms");
-        //TODO: ingest input stream and draw rects around faces
-        start = System.nanoTime();
-        g.drawImage(currFrame, 0,0,this);
-        stop = System.nanoTime();
-        System.out.println("drawImage took: " + (stop - start) / 1000000 + " ms");
-
-        repaint();
-    }
-
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(640, 480);
-    }
 
     public Client(){
         setSize(480, 640);
@@ -92,6 +58,34 @@ class Client extends JPanel {
         // grab a frame every 33 ms (30 frames/sec)
     }
 
+    @Override
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        //System.out.println("Paint called");
+        try {
+            pLoop(g);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void pLoop(Graphics g) throws Exception{
+        Mat image = grabFrame();
+
+        sendFrame(image);
+
+        currFrame = toBuffImg(image);
+
+        g.drawImage(currFrame, 0,0,this);
+        repaint();
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(640, 480);
+    }
+
+    //helpers
     private static void sendFrame(Mat image) throws IOException{
         outputStream.write(0x01); //sends ready byte
 
@@ -119,7 +113,7 @@ class Client extends JPanel {
         return frame;
     }
 
-    public static BufferedImage toBuffImg(Mat m) {
+    private static BufferedImage toBuffImg(Mat m) {
         int type = BufferedImage.TYPE_BYTE_GRAY;
         if ( m.channels() > 1 ) {
             type = BufferedImage.TYPE_3BYTE_BGR;
