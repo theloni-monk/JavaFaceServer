@@ -44,7 +44,7 @@ class ServerThread implements Runnable {
         this.absoluteFaceSize = 0;
 
         //load face detector
-        //TODO: fix file path
+        //TODO: fix file paths
         String haar = "C:\\Users\\TheoA\\Documents\\Github\\JavaFaceServer\\FaceServer\\src\\haarcascade.xml";
         String lbp =  "C:\\Users\\TheoA\\Documents\\Github\\JavaFaceServer\\FaceServer\\src\\lbp.xml";
 
@@ -82,7 +82,6 @@ class ServerThread implements Runnable {
                     else{
                         outputStream.write(0x00); // tell client no faces were found
                     }
-                    //FIXME: hangs here
                 }
             }
         }
@@ -113,13 +112,14 @@ class ServerThread implements Runnable {
             int height = grayFrame.rows();
             if (Math.round(height * 0.1f) > 0)
             {
-                this.absoluteFaceSize = Math.round(height * 0.2f);
+                this.absoluteFaceSize = Math.round(height * 0.1f);
             }
         }
 
         // detect faces
         //FIXME: fuck this shit
-        this.faceCascade.detectMultiScale(grayFrame, faces, 1.1, 1, Objdetect.CASCADE_SCALE_IMAGE,
+        //TODO: implement DNN face detection
+        this.faceCascade.detectMultiScale(grayFrame, faces, 1.2, 2, Objdetect.CASCADE_SCALE_IMAGE,
                 new Size(this.absoluteFaceSize, this.absoluteFaceSize), new Size());
 
         //return the list of faces in Rect[] form
