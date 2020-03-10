@@ -70,6 +70,8 @@ class Client extends JPanel {
             pLoop(g);
         } catch (Exception e) {
             e.printStackTrace();
+            try{socket.close();}catch(Exception e1){}
+            System.exit(0);
         }
     }
 
